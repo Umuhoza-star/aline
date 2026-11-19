@@ -1,0 +1,432 @@
+---
+title: "P other"
+author: "Marie Rose UMUHOZA"
+date: "2026-11-19"
+output: html_document
+---
+
+#Question 2. How many variables and observations are in the dataset?
+# Number of variables
+ncol(bacteria)
+
+# Number of observations
+nrow(bacteria)
+
+# Display both together
+dim(bacteria)
+
+#Question 3. Clean the dataset.
+#Data cleaning involves identifying missing values, duplicates, incorrect formats and inconsistent categories.
+
+#Step 1: Check missing values
+colSums(is.na(bacteria))
+#Step 2: Check duplicated observations
+sum(duplicated(bacteria))
+#Step 3: Remove duplicate records
+bacteria <- bacteria %>%
+  distinct()
+# Step 4: Check data structure
+str(bacteria)
+#Step 5: Check summary statistics
+summary(bacteria)
+#Step 6: Check outliers using boxplots
+boxplot(bacteria$age,
+        main = "Boxplot of Age",
+        ylab = "Age")
+# Step 7: Handle missing values
+bacteria_clean <- bacteria %>%
+  filter(!is.na(age),
+         !is.na(var1))
+
+#Question 4. What is the prevalence of bact_isolated in the dataset? Display it using a bar chart.
+ggplot(bacteria,
+       aes(x = factor(bact_isolated))) +
+
+  geom_bar(fill = "steelblue") +
+
+  labs(title = "Distribution of Bacterial Isolation",
+       x = "Bacterial Isolation",
+       y = "Frequency") +
+
+  theme_minimal()
+
+#Question 5. Display a side-by-side bar chart showing the distribution of bact_isolated by sites.
+
+ggplot(bacteria,
+       aes(x = sites,
+           fill = factor(bact_isolated))) +
+
+  geom_bar(position = "dodge") +
+
+  labs(title = "Bacterial Isolation by Site",
+       x = "Sites",
+       y = "Frequency",
+       fill = "Bact Isolated") +
+
+  theme_minimal()
+  
+#Question 6. In one graph, show the trend from 2014 of each bact_isolated by sites.
+
+ggplot(trend_data,
+       aes(x = year,
+           y = total,
+           color = factor(bact_isolated),
+           group = interaction(sites, bact_isolated))) +
+
+  geom_line() +
+
+  geom_point() +
+
+  facet_wrap(~ sites) +
+
+  labs(title = "Bacterial Isolation Trends by Site",
+       x = "Year",
+       y = "Number of Observations",
+       color = "Bact Isolated") +
+
+  theme_minimal()
+  
+#Interpretation:
+- An increasing line indicates an increase in the number of observations in that category.
+- A decreasing line indicates a decrease.
+- A flat line indicates little change.
+#Question 7. Create two datasets: one for individuals under 16 years (Young) and another for individuals aged 16 years and above (Adults). Compare the prevalence of bact_isolated between young people and adults.
+
+#Step 1: Create the two datasets
+# Young individuals
+young <- bacteria %>%
+  filter(age < 16)
+
+# Adults
+adults <- bacteria %>%
+  filter(age >= 16)
+  
+#Step 2: Count observations
+# Number of young individuals
+nrow(young)
+
+# Number of adults
+nrow(adults)
+#Step 3: Calculate prevalence among young individuals
+young_prevalence <- mean(
+  young$bact_isolated == 1,
+  na.rm = TRUE
+) * 100
+
+print(young_prevalence)
+
+#Step 5: Compare the two groups
+comparison <- data.frame(
+  Age_Group = c("Young", "Adults"),
+
+  Prevalence = c(
+    young_prevalence,
+    adult_prevalence
+  )
+)
+
+print(comparison)
+
+# Step 6: Visualize the comparison
+
+ggplot(comparison,
+       aes(x = Age_Group,
+           y = Prevalence,
+           fill = Age_Group)) +
+
+  geom_col() +
+
+  labs(title = "Bacterial Prevalence: Young vs Adults",
+       x = "Age Group",
+       y = "Prevalence (%)") +
+
+  theme_minimal()
+  
+#Step 3: Calculate prevalence among young individuals
+young_prevalence <- mean(
+  young$bact_isolated == 1,
+  na.rm = TRUE
+) * 100
+
+print(young_prevalence)
+
+# Step 4: Calculate prevalence among adults
+adult_prevalence <- mean(
+  adults$bact_isolated == 1,
+  na.rm = TRUE
+) * 100
+
+print(adult_prevalence)
+
+# Step 5: Compare the two groups
+comparison <- data.frame(
+  Age_Group = c("Young", "Adults"),
+
+  Prevalence = c(
+    young_prevalence,
+    adult_prevalence
+  )
+)
+
+print(comparison)
+
+# Step 6: Visualize the comparison
+ggplot(comparison,
+       aes(x = Age_Group,
+           y = Prevalence,
+           fill = Age_Group)) +
+
+  geom_col() +
+
+  labs(title = "Bacterial Prevalence: Young vs Adults",
+       x = "Age Group",
+       y = "Prevalence (%)") +
+
+  theme_minimal()
+  
+
+
+#Question 8 (I). Fit a multiple linear regression model to predict Var1 using Age, Var2 to Var5, Sex, Education and Boiled Water.
+
+# Fit multiple linear regression
+model_multiple <- lm(
+  var1 ~ age + var2 + var3 + var4 +
+    var5 + sex + education + boiled_water,
+  data = bacteria
+)
+
+# Display results
+summary(model_multiple)
+##### Interpretation:
+
+The output provides:
+- Coefficients: Show the estimated relationship between each predictor and Var1, holding other predictors constant.
+- Standard error: Measures uncertainty in the estimated coefficient.
+- t-value: Tests whether the coefficient differs from zero.
+- p-value: Indicates statistical evidence for the predictor.
+- R-squared: Shows the proportion of variation in Var1 explained by the model.
+- Adjusted R-squared: Adjusts R-squared for the number of predictors.
+For p-values:
+- p-value less than 0.05: Statistically significant at the 5% level.
+- p-value greater than 0.05: Not statistically significant at the 5% level.
+
+###
+Categorical variables such as Sex and Education should be converted into factors before fitting the model.
+bacteria$sex <- as.factor(bacteria$sex)
+
+bacteria$education <- as.factor(bacteria$education)
+
+bacteria$boiled_water <- as.factor(bacteria$boiled_water)
+
+##Question 8 (II). Fit a simple linear regression model to predict Var1 using Age as the only predictor.
+Here:
+- Dependent variable: Var1.
+- Independent variable: Age.
+# Fit simple linear regression
+model_age <- lm(
+  var1 ~ age,
+  data = bacteria
+)
+
+# Display results
+summary(model_age)
+
+For example, if the coefficient is 2:
+
+A one-unit increase in age is associated with an estimated two-unit increase in Var1.
+
+The p-value indicates whether there is statistical evidence of a linear relationship between Age and Var1.
+
+###Question 8 (III). Evaluate the statistical significance of the relationship between Age and Var1.
+We use the p-value from the simple linear regression model.
+
+Hypotheses:
+
+Null hypothesis (H₀):
+
+There is no statistically significant linear relationship between Age and Var1.
+\[
+H_0:\beta_1=0
+\]
+
+Alternative hypothesis (H₁):
+
+There is a statistically significant linear relationship between Age and Var1.
+\[
+H_1:\beta_1\neq0
+\]
+
+
+# Display regression results
+summary(model_age)
+
+Decision rule:
+P-value	Decision
+p-value less than 0.05	Reject H₀
+p-value greater than 0.05	Fail to reject H₀
+
+Interpretation:
+
+If the p-value is 0.03, there is statistically significant evidence of a linear relationship between Age and Var1 at the 5% significance level.
+
+If the p-value is 0.20, there is insufficient statistical evidence of a linear relationship.
+
+
+#Question 8 (IV). Visualize the relationship between Var1 and Age using a scatter plot with a fitted regression line. What patterns do you observe?
+Answer:
+
+A scatter plot is used to visualize the relationship between two numerical variables.
+
+ggplot(bacteria,
+       aes(x = age, y = var1)) +
+
+  geom_point(color = "blue") +
+
+  geom_smooth(method = "lm",
+              se = TRUE,
+              color = "red") +
+
+  labs(title = "Relationship Between Age and Var1",
+       x = "Age",
+       y = "Var1") +
+
+  theme_minimal()
+  
+#Interpretation:
+
+There are three possible patterns:
+1. Positive relationship: As Age increases, Var1 also increases.
+2. Negative relationship: As Age increases, Var1 decreases.
+3. No clear relationship: Changes in Age do not show a clear linear pattern in Var1.
+
+
+
+#Question 8 (V). Assess the model assumptions by producing diagnostic plots (Residuals vs Fitted, Q-Q plot, etc.).
+Answer:
+
+Diagnostic plots are used to check whether the assumptions of linear regression are satisfied.
+
+# Set plotting area
+par(mfrow = c(2, 2))
+
+# Diagnostic plots
+plot(model_age)
+
+##Interpretation:
+1. Residuals vs Fitted: Checks linearity and constant variance.
+2. Normal Q-Q: Checks whether residuals are approximately normally distributed.
+3. Scale-Location: Checks whether residual variance is approximately constant.
+4. Residuals vs Leverage: Helps identify influential observations.
+
+
+
+#Question 8 (VI). Repeat the regression using Var2 instead of Age as the predictor.
+Answer:
+
+Here we fit another simple linear regression model.
+- Dependent variable: Var1.
+- Independent variable: Var2.
+
+# Fit simple linear regression using Var2
+model_var2 <- lm(
+  var1 ~ var2,
+  data = bacteria
+)
+
+# Display results
+summary(model_var2)
+
+# visualization 
+ggplot(bacteria,
+       aes(x = var2, y = var1)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm",
+              color = "red") +
+
+  labs(title = "Relationship Between Var2 and Var1",
+       x = "Var2",
+       y = "Var1") +
+
+  theme_minimal()
+  
+  
+#Question 8 (VII). Which model explains more variance in Var1?
+Answer:
+
+We compare the R-squared values of the two simple linear regression models.
+- Model 1: Var1 predicted by Age.
+- Model 2: Var1 predicted by Var2.
+R-squared measures the proportion of variation in the dependent variable explained by the independent variable.
+
+# R-squared for Age model
+r2_age <- summary(model_age)$r.squared
+
+# R-squared for Var2 model
+r2_var2 <- summary(model_var2)$r.squared
+
+# Display results
+r2_age
+r2_var2
+# comparison
+model_comparison <- data.frame(
+
+  Model = c("Age Model", "Var2 Model"),
+
+  R_squared = c(r2_age, r2_var2)
+)
+
+print(model_comparison)
+
+
+#Interpretation:
+
+Suppose the results are:
+Model	R-squared
+Age model	0.30
+Var2 model	0.65
+
+The Var2 model explains 65% of the variation in Var1, while the Age model explains 30%.
+
+Therefore, the Var2 model explains more variance in Var1.
+
+
+#Question 8 (VIII). Based on R-squared and p-values, which predictor is stronger?
+Answer:
+
+We compare the R-squared values and p-values of Age and Var2.
+# Extract R-squared
+r2_age <- summary(model_age)$r.squared
+
+r2_var2 <- summary(model_var2)$r.squared
+
+# Extract p-values
+p_age <- coef(summary(model_age))["age", "Pr(>|t|)"]
+
+p_var2 <- coef(summary(model_var2))["var2", "Pr(>|t|)"]
+
+# Display comparison
+comparison <- data.frame(
+
+  Predictor = c("Age", "Var2"),
+
+  R_squared = c(r2_age, r2_var2),
+
+  P_value = c(p_age, p_var2)
+)
+
+print(comparison)
+
+##### nterpretation:
+
+A predictor can be considered stronger in this comparison when:
+1. It has a higher R-squared value.
+2. It has a statistically significant p-value (less than 0.05).
+For example:
+Predictor	R-squared	P-value
+Age	0.30	0.04
+Var2	0.65	0.001
+
+Conclusion: Var2 is the stronger predictor in this example because it explains more variation in Var1 and has a smaller p-value.
+

@@ -1,0 +1,113 @@
+---
+title: "Geom_Function Practice"
+author: "Marie Rose UMUHOZA"
+Student ID: 20252MBI061
+date: "2026-11-14"
+output: html_document
+---
+#ggplot2 is an R package used to create attractive and professional data visualizations.
+#install ggplot2 packages
+install.packages("ggplot2")
+#load ggplot2
+library(ggplot2)
+#view top six cars data
+head(cars)
+#summary of cars data
+summary(cars)
+#create scatter plot
+ggplot(data=cars,aes(x=dist, y=speed)) + geom_point()
+#create histogram graph
+ggplot(data=cars, aes(x=speed)) +geom_histogram(binwidth=1)
+ggplot(data=cars, aes(x=dist)) +geom_histogram(binwidth=1)
+# Students dataframe
+```{r}
+students <- data.frame(
+  Name = c("John", "Mary", "Peter", "Alice", "David"),
+  Gender = c("Male", "Female", "Male", "Female", "Male"),
+  Age = c(22, 21, 24, 23, 25),
+  Marks = c(70, 85, 65, 90, 75)
+)
+print(students)
+```
+#create bar chart
+```{r}
+ggplot(data = students,aes(x = Gender, fill = Gender)) +      geom_bar(position = "dodge") +
+labs(
+ title = "Number of Students Per Gender",
+ x = "Gender",
+ y = "Number of Students"
+) +
+theme_classic()
+```
+#create Histogram
+```{r}
+ggplot(data = students, aes(x = Marks)) + geom_histogram(binwidth = 3)
+```
+#creating Scatterplot
+```{r}
+ggplot(data = students, aes(x = Age, y = Marks)) + 
+geom_point(
+color = "blue",
+size = 3,
+shape = 16
+) + 
+geom_smooth(method = "lm", se = FALSE, color = "black")+
+labs(
+ title = "Relationship between Age and Marks",
+ x = "Student age",
+ y = "Student Marks"
+) +
+theme_classic()
+```
+
+# craeting Boxplot
+```{r}
+library(ggplot2)
+ggplot(data = students, aes(x = Gender, y = Marks)) + 
+  geom_boxplot(fill = "skyblue") +
+  labs(
+   title = "Boxplot of Student Marks",
+   x = "Gender",
+   y = "Student Marks"
+) +
+theme_classic()
+```
+#creating bar chart graph
+```{r}
+ggplot(students, aes(x = Gender, fill = Gender)) +
+  geom_bar(position = "stack")
+```
+# mortality Data 
+```{r}
+mortality <- data.frame(
+  Month = rep(c("Jan", "Feb", "Mar",
+                "Apr", "May", "Jun"), 2),
+
+  Type = rep(c("Community", "Health Facility"), each = 6),
+
+  Deaths = c(
+    15, 18, 20, 17, 25, 22,
+    10, 12, 11, 14, 13, 16
+  )
+)
+print(mortality)
+```
+# Create multiple line graphs
+```{r}
+ggplot(mortality,
+       aes(x = Month, y = Deaths,
+           color = Type, group = Type)) +
+
+  geom_line(linewidth = 1) +
+
+  geom_point(size = 2) +
+
+  labs(
+    title = "Community vs Facility Deaths",
+    x = "Month",
+    y = "Number of Deaths",
+    color = "Death Type"
+  ) +
+
+  theme_classic()
+```

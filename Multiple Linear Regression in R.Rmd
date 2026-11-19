@@ -1,0 +1,130 @@
+---
+title: "Multiple Linear Regression (Fitness and interprentation results"
+author: "Marie Rose UMUHOZA"
+Student ID: 20252MBI061
+date: "2026-11-15"
+output: html_document
+---
+
+# Create a health dataset
+
+```{r}
+health <- data.frame(
+  Sector = paste0("Sector_", 1:20),
+
+  Population = c(
+    12000, 15000, 18000, 20000, 22000,
+    25000, 27000, 30000, 32000, 35000,
+    38000, 40000, 42000, 45000, 48000,
+    50000, 52000, 55000, 58000, 60000
+  ),
+
+  Health_Facilities = c(
+    1, 2, 2, 3, 2, 3, 2, 4, 3, 4,
+    3, 4, 5, 4, 5, 4, 5, 6, 5, 6
+  ),
+
+  Poverty_Rate = c(
+    45, 40, 38, 35, 42, 33, 39, 30, 34, 28,
+    32, 25, 27, 24, 29, 22, 25, 20, 23, 18
+  ),
+
+  Distance = c(
+    8, 6, 7, 5, 9, 4, 8, 3, 6, 4,
+    5, 3, 4, 2, 5, 3, 2, 2, 3, 1
+  ),
+
+  Community_Deaths = c(
+    35, 38, 44, 42, 50, 48, 55, 52, 59, 57,
+    64, 60, 67, 65, 72, 69, 75, 73, 79, 77
+  )
+)
+
+# Display the dataset
+print(health)
+```
+# check relationship between Depandent variable and independent variables
+
+library(ggplot2)
+```{r}
+ggplot(data = health, aes(y = Community_Deaths, x = Population)) + geom_point(color = "blue") + 
+labs(
+  title = "Relationship between Community_Deaths and population",
+  y = "Community_Deaths",
+  x = "population"
+)+ 
+ theme_classic()
+```
+# Check dataset structure
+```{r}
+str(health)
+```
+
+# Summary statistics
+```{r}
+summary(health)
+```
+#Fit a multiple linear regression model
+```{r}
+model <- lm(
+  Community_Deaths ~ Population +
+    Health_Facilities +
+    Poverty_Rate +
+    Distance,
+  data = health
+)
+summary (model)
+```
+# Interpretation : Population has a positive and statistically significant association with community deaths.Holding the other variables constant, an increase of 1,000 people in population is associated with an estimated increase of 1.09.
+# Population has a positive and statistically significant association with community deaths.
+# other variables (health facilities, poverty_rate and distance)and intercept are statistical insignificant at the 5 %.
+
+
+
+# Display regression coefficients
+```{r}
+coef(model)
+```
+
+# Confidence intervals
+```{r}
+confint(model)
+```
+
+# Predicted values
+```{r}
+fitted(model)
+```
+
+# Residuals
+```{r}
+residuals(model)
+```
+
+# Model R-squared
+```{r}
+summary(model)$r.squared
+```
+
+# Adjusted R-squared
+```{r}
+summary(model)$adj.r.squared
+```
+
+#Check assumption
+```{r}
+plot(model)
+```
+
+Summary: Characteristics of a good regression model
+Characteristic	What we expect
+R-squared	Relatively high
+Adjusted R-squared	Relatively high
+F-statistic	Statistically significant
+P-values	Relevant predictors statistically significant
+Multicollinearity	No serious multicollinearity
+Homoscedasticity	Constant residual variance
+Normality	Approximately normal residuals for classical inference
+Autocorrelation	No problematic autocorrelation
+RMSE	Relatively low
+Prediction performance	Good performance on unseen data

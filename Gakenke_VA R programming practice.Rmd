@@ -1,0 +1,358 @@
+---
+title: "VA analysis"
+author: "Marie Rose UMUHOZA"
+date: "2026-11-18"
+output: html_document
+---
+install.packages("readr", type = "binary")
+library(readr)
+Nembabirth_record <- read_csv("C:/Users/pc/Downloads/births-report-6afdabaf3913d8000d87ed79.csv")
+#Number of columns
+```{r}
+ncol(Nembabirth_record)
+```
+install.packages("readxl", type = "binary")
+library(readxl)
+Gakenke_VA <- read_excel("C:/Users/pc/Downloads/VA Update_2026-11-18.xlsx")
+#read top 6 row
+```{r}
+head(Gakenke_VA)
+```
+```{r}
+ncol(Gakenke_VA)
+```
+```{r}
+nrow(Gakenke_VA)
+```
+# Display first six rows
+head(Gakenke_VA)
+
+# Display dataset
+View(Gakenke_VA)
+
+# Check variables and data types
+str(Gakenke_VA)
+
+# Number of observations and variables
+dim(Gakenke_VA)
+
+# Summary statistics
+summary(Gakenke_VA)
+library(dplyr)
+library(ggplot2)
+#list of Variables
+names(Gakenke_VA)
+# first 10 observations
+head(Gakenke_VA,10)
+#last 10 observations
+tail(Gakenke_VA)
+# Chech dataset Dimension - dim()
+dim(Gakenke_VA)
+#Check Variables data types
+str(Gakenke_VA)
+#Descriptive Statistics - summary()
+summary(Gakenke_VA)
+# checking missing values
+sum(is.na(Gakenke_VA))
+#count missing values for each variable
+colSums(is.na(Gakenke_VA))
+#To calculate the percentage of missing values in each variable
+colMeans(is.na(Gakenke_VA))
+#check duplicated records_count duplicated rows
+sum(duplicated(Gakenke_VA))
+# displays duplicated row
+Gakenke_VA[duplicated(Gakenke_VA), ]
+# Check unique Values
+unique(Gakenke_VA$District)
+#records per each category
+table(Gakenke_VA$District)
+#Data Quality 
+# Check missing values
+colSums(is.na(cholera))
+
+# Check duplicated records
+sum(duplicated(cholera))
+
+# Check dataset structure
+str(cholera)
+
+# Check summary statistics
+summary(cholera)
+
+# Check unique values in sex
+unique(cholera$sex)
+
+# Check unique values in outcome
+unique(cholera$outcome)
+
+# Check age values
+summary(cholera$age)
+
+# Check invalid negative ages
+cholera %>%
+  filter(age < 0)
+#Standarize category such as Gender:
+Gakenke_VA$Sex[
+  tolower(trimws(Gakenke_VA$Sex)) %in% c("m", "male")
+] <- "Male"
+#Explainations:tolower() converts text into lowercase.
+
+#trimws() removes unnecessary spaces.
+
+#%in% checks whether a value belongs to a list.
+
+#case_when() replaces values according to conditions.
+
+#TRUE ~ as.character(Sex) keeps other values unchanged, including missing values.
+
+
+#@Question 2. Harmonize the codification of the variable "Sex".
+cholera <- cholera %>%
+  mutate(sex = case_when(
+    tolower(trimws(sex)) %in% c("m", "male") ~ "Male",
+
+    tolower(trimws(sex)) %in% c("f", "female") ~ "Female",
+
+    TRUE ~ NA_character_
+  ))
+
+# Check the harmonized categories
+table(cholera$sex, useNA = "ifany")
+
+
+#Recode the variable “Age” into “AgeGroup” using the following age classes:
+cholera <- cholera %>%
+  mutate(AgeGroup = case_when(
+
+    age < 5 ~ "Less than 5 years",
+
+    age >= 5 & age <= 14 ~ "5-14 years",
+
+    age >= 15 & age <= 24 ~ "15-24 years",
+
+    age >= 25 & age <= 49 ~ "25-49 years",
+
+    age >= 50 ~ "50 years and above",
+
+    TRUE ~ NA_character_
+  ))
+
+# Display age group frequencies
+table(cholera$AgeGroup)
+
+# Display percentages
+prop.table(table(cholera$AgeGroup)) * 100
+# Perform the statistical analyses required and produce outputs (graphs and tables) for
+#briefing of the Minister based on his interest [Please ensure that you save your statistical,analysis program and document step by step what you have done].
+#A. Total number of cholera cases
+# Calculate total cases
+total_cases <- nrow(cholera)
+
+print(total_cases)
+#Geographical distribution of cases
+# Cases by province
+cases_province <- cholera %>%
+  count(province, name = "Total_Cases")
+
+print(cases_province)
+
+# Cases by district
+cases_district <- cholera %>%
+  count(district, name = "Total_Cases")
+
+print(cases_district)
+#Visualize cases by province:
+ggplot(cases_province,
+       aes(x = province, y = Total_Cases)) +
+
+  geom_col(fill = "steelblue") +
+
+  labs(title = "Cholera Cases by Province",
+       x = "Province",
+       y = "Number of Cases") +
+
+  theme_minimal()
+  
+#C. Number of deaths and Case Fatality Rate (CFR)
+# Count deaths
+total_deaths <- sum(
+  tolower(trimws(cholera$outcome)) == "death",
+  na.rm = TRUE
+)
+
+# Calculate CFR
+CFR <- (total_deaths / total_cases) * 100
+
+# Display results
+total_deaths
+CFR
+#Interpretation: A CFR of 5% means that 5 out of every 100 reported cases resulted in death.
+
+
+|# Most and least affected age groups
+# Calculate cases by age group
+age_distribution <- cholera %>%
+  count(AgeGroup, name = "Total_Cases")
+
+print(age_distribution)
+# Create a bar chart:
+ggplot(age_distribution,
+       aes(x = AgeGroup, y = Total_Cases)) +
+
+  geom_col(fill = "orange") +
+
+  labs(title = "Cholera Cases by Age Group",
+       x = "Age Group",
+       y = "Number of Cases") +
+
+  theme_minimal() +
+
+  theme(axis.text.x =
+          element_text(angle = 45, hjust = 1))
+
+
+#E. Gender distribution
+# Frequency by sex
+gender_distribution <- cholera %>%
+  count(sex, name = "Total_Cases")
+
+print(gender_distribution)
+# ber chart
+ggplot(gender_distribution,
+       aes(x = sex, y = Total_Cases,
+           fill = sex)) +
+
+  geom_col() +
+
+  labs(title = "Cholera Cases by Gender",
+       x = "Gender",
+       y = "Number of Cases") +
+
+  theme_minimal()
+  
+
+# F. Analyse cases by age, gender and district
+# Cases by age group and sex
+table(cholera$AgeGroup, cholera$sex)
+
+# Cases by district and sex
+table(cholera$district, cholera$sex)
+
+# Cases by district and age group
+table(cholera$district, cholera$AgeGroup)
+# Example: District and gender
+district_sex_table <- table(cholera$district,
+                            cholera$sex)
+
+chisq.test(district_sex_table)
+#Interpretation of p-values:
+- p-value less than 0.05: There is statistically significant evidence of an association between the variables.
+- p-value greater than 0.05: There is insufficient statistical evidence of an association.
+
+
+#G. Epidemic curve
+# Convert date of onset into Date format
+cholera$date_onset <- as.Date(cholera$date_onset)
+
+# Count cases by onset date
+epidemic_data <- cholera %>%
+  filter(!is.na(date_onset)) %>%
+  count(date_onset, name = "Cases")
+
+# Draw epidemic curve
+ggplot(epidemic_data,
+       aes(x = date_onset, y = Cases)) +
+
+  geom_col(fill = "red") +
+
+  labs(title = "Cholera Epidemic Curve",
+       x = "Date of Onset",
+       y = "Number of Cases") +
+
+  theme_minimal()
+  
+#Interpretation: A sudden increase in the epidemic curve indicates an increase in reported cases. The highest point represents the peak of reported cases.
+
+
+
+#H. Distribution by outcome and recovery rate
+
+# Total recovered cases
+recovered <- sum(
+  tolower(trimws(cholera$outcome)) == "recovered",
+  na.rm = TRUE
+)
+
+# Total cases with known outcomes
+known_outcomes <- sum(
+  !is.na(cholera$outcome)
+)
+
+# Recovery rate
+recovery_rate <- (recovered / known_outcomes) * 100
+
+print(recovery_rate)
+
+Question 6. What are the risk factors driving the spread of the outbreak? Provide estimates and detailed output.
+Answer:
+
+Risk factors are conditions or characteristics that increase the possibility of disease transmission or infection.
+
+Possible cholera risk factors include:
+1. Drinking contaminated water.
+2. Poor sanitation and hygiene.
+3. Eating contaminated food.
+4. Poor handwashing practices.
+5. Overcrowded living conditions.
+6. Poor waste management.
+7. Limited access to safe drinking water.
+8. Close contact with contaminated environments.
+
+
+Question 7. What recommendations would you provide to strengthen surveillance and outbreak response?
+Answer:
+
+Based on the cholera outbreak analysis, I would recommend the following:
+
+1. Strengthen disease surveillance
+
+Health facilities should report suspected and confirmed cholera cases immediately to the responsible surveillance officers.
+
+2. Improve access to clean water
+
+The government should ensure that communities have access to safe drinking water.
+
+3. Improve sanitation and hygiene
+
+Communities should be educated about proper sanitation, handwashing and safe food preparation.
+
+4. Increase public awareness
+
+Conduct awareness campaigns about cholera symptoms, transmission and prevention.
+
+5. Strengthen laboratory testing
+
+Ensure timely laboratory confirmation of suspected cholera cases.
+
+6. Improve healthcare services
+
+Provide adequate treatment facilities, medical supplies and trained health professionals.
+
+7. Prioritize highly affected areas
+
+Allocate more resources to districts and provinces reporting the highest numbers of cases.
+
+8. Strengthen data quality
+
+Ensure accurate recording of patient information, age, gender, date of onset and outcome.
+
+9. Monitor the epidemic curve
+
+Regularly monitor trends to identify increases in cases and respond quickly.
+
+10. Strengthen coordination
+
+Improve collaboration between the Ministry of Health, local government, health facilities and other partners.
+
+Conclusion: Effective surveillance, access to safe water, proper sanitation and timely treatment are essential for controlling the cholera outbreak and preventing further transmission.
+
